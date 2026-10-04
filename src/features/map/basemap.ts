@@ -5,15 +5,8 @@ import type { GeometryCollection, Topology } from 'topojson-specification';
 import countriesUrl from 'world-atlas/countries-50m.json?url';
 import { unwrap } from '../../domain/geo';
 import type { LngLat } from '../../domain/types';
-
-export const palette = {
-  space: '#04070f',
-  ocean: '#0a1428',
-  land: '#16213a',
-  landEdge: '#2b3b5c',
-  border: '#33456a',
-  graticule: '#1a2a48',
-};
+import { DETAIL_SOURCE, GLYPHS, detailLayers, detailSource } from './detailLayers';
+import { palette } from './palette';
 
 const empty: FeatureCollection = { type: 'FeatureCollection', features: [] };
 
@@ -34,11 +27,12 @@ function graticule(step = 15): FeatureCollection<MultiLineString> {
 /**
  * Self-contained base style: the world geography ships with the app
  * (Natural Earth, public domain) so the map always renders, offline included.
- * A detailed raster basemap fades in when zooming on a city.
+ * Detailed OpenStreetMap layers fade in when zooming on a region.
  */
 export function buildBaseStyle(): StyleSpecification {
   return {
     version: 8,
+    glyphs: GLYPHS,
     projection: { type: 'globe' },
     sky: {
       'sky-color': '#0b1630',
@@ -53,14 +47,7 @@ export function buildBaseStyle(): StyleSpecification {
       graticule: { type: 'geojson', data: graticule() },
       countries: { type: 'geojson', data: empty },
       borders: { type: 'geojson', data: empty },
-      detail: {
-        type: 'raster',
-        tiles: ['a', 'b', 'c', 'd'].map((s) => `https://${s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png`),
-        tileSize: 256,
-        maxzoom: 19,
-        attribution:
-          '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · © <a href="https://carto.com/attributions">CARTO</a> · Natural Earth',
-      },
+      [DETAIL_SOURCE]: detailSource,
     },
     layers: [
       { id: 'ocean', type: 'background', paint: { 'background-color': palette.ocean } },
@@ -76,28 +63,27 @@ export function buildBaseStyle(): StyleSpecification {
         source: 'countries',
         paint: { 'fill-color': palette.land, 'fill-antialias': true },
       },
+      ...detailLayers,
       {
         id: 'land-edge',
         type: 'line',
         source: 'countries',
-        paint: { 'line-color': palette.landEdge, 'line-width': 0.8, 'line-blur': 0.4 },
+        paint: {
+          'line-color': palette.landEdge,
+          'line-width': 0.8,
+          'line-blur': 0.4,
+          'line-opacity': ['interpolate', ['linear'], ['zoom'], 4, 1, 6, 0],
+        },
       },
       {
         id: 'borders',
         type: 'line',
         source: 'borders',
-        paint: { 'line-color': palette.border, 'line-width': 0.6, 'line-opacity': 0.8, 'line-dasharray': [2, 2] },
-      },
-      {
-        id: 'detail',
-        type: 'raster',
-        source: 'detail',
-        minzoom: 3,
         paint: {
-          'raster-opacity': ['interpolate', ['linear'], ['zoom'], 3.5, 0, 6, 0.9],
-          'raster-saturation': -0.2,
-          'raster-contrast': 0.08,
-          'raster-fade-duration': 250,
+          'line-color': palette.border,
+          'line-width': 0.6,
+          'line-opacity': ['interpolate', ['linear'], ['zoom'], 4, 0.8, 6, 0],
+          'line-dasharray': [2, 2],
         },
       },
     ],

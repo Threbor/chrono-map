@@ -80,7 +80,7 @@ src/
 ```
 
 - **React 19 + TypeScript + Vite**, **MapLibre GL 5** en projection globe.
-- **Fond de carte embarqué** (Natural Earth via `world-atlas`) : la carte s'affiche toujours, même hors ligne. Un fond détaillé (OpenStreetMap / CARTO) apparaît en fondu quand on zoome sur une ville.
+- **Fond de carte embarqué** (Natural Earth via `world-atlas`) : la carte s'affiche toujours, même hors ligne. Les détails (routes, villes, bâtiments, lacs) apparaissent en fondu au zoom : données OpenStreetMap servies en tuiles vectorielles par [OpenFreeMap](https://openfreemap.org), gratuit et **sans clé d'API**, stylisées dans `features/map/detailLayers.ts`.
 - La logique métier est pure et testée ; les vues ne font que la projeter.
 
 ## Développement
@@ -96,4 +96,4 @@ Déploiement : Vercel détecte Vite automatiquement (`vercel.json` fourni) ; auc
 
 ## Crédits
 
-Géographie : [Natural Earth](https://www.naturalearthdata.com/) (domaine public). Fond détaillé : © [OpenStreetMap](https://www.openstreetmap.org/copyright), © [CARTO](https://carto.com/attributions). L'affaire du chronographe Azur est un scénario fictif ; les personnes et la maison de ventes sont inventées.
+Géographie : [Natural Earth](https://www.naturalearthdata.com/) (domaine public). Fond détaillé : [OpenFreeMap](https://openfreemap.org), © [OpenMapTiles](https://www.openmaptiles.org/), © [OpenStreetMap](https://www.openstreetmap.org/copyright). L'affaire du chronographe Azur est un scénario fictif ; les personnes et la maison de ventes sont inventées.
